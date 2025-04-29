@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Empire Clone</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            margin: 0;
+            padding: 0;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        #version-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+<div id="game-container"></div>
+<div id="version-info">v0.1.0 - Développement</div>
+
+<!-- Données de jeu -->
+<script src="js/gameData.js"></script>
+
+<!-- Gestionnaires -->
+<script src="js/managers/SaveManager.js"></script>
+<script src="js/managers/MapManager.js"></script>
+<script src="js/managers/BuildingManager.js"></script>
+<script src="js/managers/RegionManager.js"></script>
+<script src="js/managers/EconomyManager.js"></script>
+<script src="js/managers/UIManager.js"></script>
+
+<!-- Scènes -->
+<script src="js/scenes/Boot.js"></script>
+<script src="js/scenes/Preload.js"></script>
+<script src="js/scenes/MainGame.js"></script>
+
+<!-- Configuration et initialisation - ces scripts doivent être chargés en dernier -->
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
