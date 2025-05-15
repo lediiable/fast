@@ -26,8 +26,13 @@ class SaveManager {
 
     saveGame() {
         try {
+            // Récupérer les files d'attente de formation si UnitManager existe
+            let trainingQueues = {};
+            if (this.scene && this.scene.unitManager) {
+                trainingQueues = this.scene.unitManager.trainingQueues;
+            }
+
             // Préparer les données à sauvegarder
-            // S'assurer que les niveaux des bâtiments sont également sauvegardés
             const saveData = {
                 playerName: gameData.playerName,
                 playerLevel: gameData.playerLevel,
@@ -37,8 +42,17 @@ class SaveManager {
                     type: building.type,
                     x: building.x,
                     y: building.y,
-                    level: building.level || 1 // Assurez-vous que le niveau est sauvegardé
+                    level: building.level || 1
                 })),
+                units: gameData.units.map(unit => ({
+                    id: unit.id,
+                    type: unit.type,
+                    level: unit.level,
+                    x: unit.x,
+                    y: unit.y,
+                    moveType: unit.moveType || 'ground'
+                })),
+                trainingQueues: trainingQueues,
                 map: gameData.map,
                 lastSave: Date.now()
             };
@@ -55,6 +69,7 @@ class SaveManager {
             return false;
         }
     }
+
 
     loadGame() {
         try {
@@ -101,10 +116,11 @@ class SaveManager {
         gameData.playerLevel = saveData.playerLevel;
         gameData.resources = saveData.resources;
         gameData.buildings = saveData.buildings || [];
+        gameData.units = saveData.units || []; // Ajouter les unités
 
         // Mise à jour des données de la carte
         if (saveData.map) {
-            gameData.map.unlockedRegions = saveData.map.unlockedRegions || [12]; // Modifié de [5] à [12]
+            gameData.map.unlockedRegions = saveData.map.unlockedRegions || [12];
 
             // Mettre à jour les régions débloquées
             if (gameData.regions) {
@@ -112,6 +128,20 @@ class SaveManager {
                     region.unlocked = saveData.map.unlockedRegions.includes(region.id);
                 });
             }
+        }
+        if (saveData.trainingQueues) {
+            this.tempTrainingQueues = saveData.trainingQueues;
+        }
+    }
+
+    restoreTrainingQueues() {
+        if (this.tempTrainingQueues && this.scene && this.scene.unitManager) {
+            // Restaurer les files d'attente
+            this.scene.unitManager.trainingQueues = this.tempTrainingQueues;
+            console.log("Files d'attente de formation restaurées");
+
+            // Nettoyer la référence temporaire
+            this.tempTrainingQueues = null;
         }
     }
 

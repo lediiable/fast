@@ -8,7 +8,7 @@ const gameData = {
         stone: 100000,
         cash: 100000,
         population: 0,      // Population actuelle
-        populationCap: 5    // Capacité de population maximale
+        populationCap: 0    // Capacité de population maximale
     },
     buildings: [
         {id: 1, type: 'townhall', level: 1, x: 50, y: 50},
@@ -89,6 +89,13 @@ const gameData = {
                 {gold: 15}, // Niveau 3
                 {gold: 25}  // Niveau 4
             ],
+            populationBonus: [
+                null,  // Pas de niveau 0
+                5,     // Niveau 1: 5 population de base
+                10,    // Niveau 2: 10 population de base
+                20,    // Niveau 3: 20 population de base
+                40     // Niveau 4: 40 population de base
+            ],
             specialAction: "trainUnits", // Changé de expandTerritoryUnlock à trainUnits
             trainableUnits: ["villager"],
             sprites: {
@@ -115,12 +122,6 @@ const gameData = {
                     {gold: 400, wood: 200}
                 ]
             },
-            production: [
-                null,
-                {populationCap: 5},
-                {populationCap: 10},
-                {populationCap: 15}
-            ],
             sprites: {
                 1: "house",
                 2: "house2",
@@ -128,6 +129,14 @@ const gameData = {
                 4: "house4",
                 5: "house5"
             },
+            populationBonus: [
+                null,  // Pas de niveau 0
+                3,     // Niveau 1: +3 population
+                7,     // Niveau 2: +7 population
+                15,    // Niveau 3: +15 population
+                30,    // Niveau 4: +30 population
+                60     // Niveau 5: +60 population
+            ],
             requirements: {level: 0} // Disponible au niveau 1
         },
 
@@ -340,15 +349,29 @@ const gameData = {
             cost: {
                 food: 50,
                 wood: 20,
-                gold: 200000,
+                gold: 20,
                 stone: 10
             },
-            trainingTime: 10, // Secondes
+            trainingTime: 10,
             hitPoints: 25,
             damage: 3,
             speed: 1.2,
             range: 1,
-            icon: 'templates/img/villager.svg',
+            moveType: 'ground',
+            icon: 'assets/icon/villager.svg',
+            sprites: {
+                static: 'assets/units/villager/villager.svg',
+                moving: {
+                    north: 'assets/units/villager/villager_north.json',
+                    northeast: 'assets/units/villager/villager_northeast.json',
+                    east: 'assets/units/villager/villager_east.json',
+                    southeast: 'assets/units/villager/villager_southeast.json',
+                    south: 'assets/units/villager/villager_south.json',
+                    southwest: 'assets/units/villager/villager_southwest.json',
+                    west: 'assets/units/villager/villager_west.json',
+                    northwest: 'assets/units/villager/villager_northwest.json'
+                }
+            },
             requiredBuilding: 'townhall',
             requiredBuildingLevel: 1
         },
@@ -364,7 +387,8 @@ const gameData = {
             damage: 8,
             speed: 0.9,
             range: 1,
-            icon: 'templates/img/swordsman.svg',
+            moveType: 'ground',
+            icon: 'assets/icon/swordsman.svg',
             requiredBuilding: 'barracks',
             requiredBuildingLevel: 1
         },
@@ -380,8 +404,27 @@ const gameData = {
             damage: 6,
             speed: 1.0,
             range: 4,
-            icon: 'templates/img/archer.svg',
+            moveType: 'ground',
+            icon: 'assets/icon/archer.svg',
             requiredBuilding: 'barracks',
+            requiredBuildingLevel: 2
+        },
+        flyingUnit: {
+            name: "Éclaireur Volant",
+            description: "Une unité volante qui peut se déplacer par-dessus les obstacles.",
+            cost: {
+                gold: 150,
+                wood: 30,
+                stone: 20
+            },
+            trainingTime: 20,
+            hitPoints: 35,
+            damage: 5,
+            speed: 1.5,
+            range: 2,
+            moveType: 'air',  // Type de déplacement aérien
+            icon: 'assets/icon/flying.svg',
+            requiredBuilding: 'temple',
             requiredBuildingLevel: 2
         }
     }

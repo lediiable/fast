@@ -85,14 +85,129 @@ class Preload extends Phaser.Scene {
         this.load.image('house4', 'assets/items/casa4.png');
         this.load.image('house5', 'assets/items/casa5.png');
         this.load.image('farm', 'assets/buildingthumbs/granja3.jpg');
+
+        this.loadUnitSprites();
     }
 
     create() {
+        this.createUnitAnimations();
+
         this.game.events.emit('loadingComplete');
 
         this.cameras.main.fadeOut(500);
         this.cameras.main.once('camerafadeoutcomplete', () => {
             this.scene.start('MainGame');
         });
+    }
+
+    loadUnitSprites() {
+        for (const [unitType, unitData] of Object.entries(gameData.unitTypes)) {
+            // Charger l'icône
+            this.load.image(`${unitType}_icon`, unitData.icon || `assets/icon/${unitType}.svg`);
+
+            // Charger le sprite statique
+            if (unitData.sprites && unitData.sprites.static) {
+                // Extraire le nom de fichier sans le chemin ni l'extension
+                const staticFileName = unitData.sprites.static.split('/').pop();
+                const staticKey = staticFileName.split('.')[0];
+
+                this.load.image(staticKey, unitData.sprites.static);
+            } else {
+                // Fallback au sprite par défaut si aucun sprite statique n'est défini
+                this.load.image(`${unitType}_static`, unitData.icon || `assets/icon/${unitType}.svg`);
+            }
+
+            // Charger les sprites d'animation pour chaque direction
+            if (unitData.sprites && unitData.sprites.moving) {
+                const directions = ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'];
+
+                directions.forEach(direction => {
+                    if (unitData.sprites.moving[direction]) {
+                        const spritePath = unitData.sprites.moving[direction];
+
+                        // Pour les sprites atlas (JSON)
+                        if (spritePath.endsWith('.json')) {
+                            const basePath = spritePath.slice(0, -5);
+                            const imgPath = `${basePath}.png`;
+                            const jsonPath = spritePath;
+
+                            // Extraire le nom de base du fichier sans le chemin
+                            const baseFileName = basePath.split('/').pop();
+
+                            // Charger l'atlas
+                            this.load.atlas(baseFileName, imgPath, jsonPath);
+                        }
+                        // Pour les images simples
+                        else {
+                            // Extraire le nom de fichier sans le chemin ni l'extension
+                            const fileName = spritePath.split('/').pop();
+                            const fileKey = fileName.split('.')[0];
+
+                            this.load.image(fileKey, spritePath);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Toujours charger le sprite par défaut
+        this.load.image('default_unit', 'assets/icon/villager.svg');
+    }
+
+    createUnitAnimations() {
+        for (const [unitType, unitData] of Object.entries(gameData.unitTypes)) {
+            if (!unitData.sprites || !unitData.sprites.moving) continue;
+
+            const directions = ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'];
+
+            directions.forEach(direction => {
+                if (unitData.sprites.moving[direction]) {
+                    const spritePath = unitData.sprites.moving[direction];
+
+                    // Pour les sprites atlas (JSON)
+                    if (spritePath.endsWith('.json')) {
+                        const baseFileName = spritePath.split('/').pop().split('.')[0];
+                        const animKey = `${unitType}_${direction}`;
+
+                        if (this.textures.exists(baseFileName)) {
+                            // Essayer différents formats de nom de frame
+                            const nameFormats = [
+                                {prefix: '', start: 1, suffix: '.png', end: 12},
+                                {prefix: '', start: 0, suffix: '.png', end: 11},
+                                {prefix: `${direction}_`, start: 0, suffix: '', end: 11},
+                                {prefix: 'frame_', start: 0, suffix: '', end: 11}
+                            ];
+
+                            for (const format of nameFormats) {
+                                try {
+                                    // Tenter de générer des frames avec ce format
+                                    const frames = this.anims.generateFrameNames(baseFileName, {
+                                        prefix: format.prefix,
+                                        start: format.start,
+                                        end: format.end,
+                                        suffix: format.suffix
+                                    });
+
+                                    if (frames.length > 0) {
+                                        // Créer l'animation si des frames sont trouvées
+                                        if (!this.anims.exists(animKey)) {
+                                            this.anims.create({
+                                                key: animKey,
+                                                frames: frames,
+                                                frameRate: 10,
+                                                repeat: -1
+                                            });
+                                        }
+                                        break;
+                                    }
+                                } catch (e) {
+                                    // Continuer avec le format suivant
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 }

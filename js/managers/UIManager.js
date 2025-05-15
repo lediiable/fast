@@ -18,6 +18,239 @@ class UIManager {
 
     }
 
+    /**
+     * Affiche l'interface d'une unité sélectionnée
+     * @param {Object} unit L'unité sélectionnée
+     */
+    showUnitInterface(unit) {
+        // Masquer toute interface existante
+        this.hideBuildingInterface();
+        this.hideUnitInterface();
+
+        // Obtenir les données du type d'unité
+        const unitTypeData = gameData.unitTypes[unit.type];
+        if (!unitTypeData) return;
+
+        // Créer l'élément principal de l'interface
+        const interfaceElement = document.createElement('div');
+        interfaceElement.id = 'unit-interface';
+        interfaceElement.style.position = 'fixed';
+        interfaceElement.style.bottom = '0';
+        interfaceElement.style.left = '50%';
+        interfaceElement.style.transform = 'translateX(-50%)';
+        interfaceElement.style.width = '90%';
+        interfaceElement.style.maxWidth = '800px';
+        interfaceElement.style.height = 'auto';
+        interfaceElement.style.minHeight = '150px';
+        interfaceElement.style.backgroundImage = 'url("assets/interfaces/bg.png")';
+        interfaceElement.style.backgroundSize = 'cover';
+        interfaceElement.style.zIndex = '1000';
+        interfaceElement.style.display = 'flex';
+        interfaceElement.style.flexDirection = 'row';
+        interfaceElement.style.flexWrap = 'wrap';
+        interfaceElement.style.padding = '10px';
+        interfaceElement.style.borderRadius = '10px 10px 0 0';
+        interfaceElement.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.7)';
+
+        // Section gauche - Image de l'unité et PV
+        const leftSection = document.createElement('div');
+        leftSection.style.flex = '0 0 120px';
+        leftSection.style.display = 'flex';
+        leftSection.style.flexDirection = 'column';
+        leftSection.style.alignItems = 'center';
+        leftSection.style.marginRight = '15px';
+        leftSection.style.position = 'relative';
+        leftSection.style.paddingTop = '2%';
+        leftSection.style.minHeight = '140px';
+
+        // Image de l'unité avec cadre
+        const unitImgContainer = document.createElement('div');
+        unitImgContainer.style.width = '100px';
+        unitImgContainer.style.height = '100px';
+        unitImgContainer.style.position = 'relative';
+        unitImgContainer.style.marginBottom = '10px';
+
+        // Cadre
+        const frameBg = document.createElement('img');
+        frameBg.src = 'assets/interfaces/cadre.svg';
+        frameBg.style.width = '100%';
+        frameBg.style.height = '100%';
+        frameBg.style.position = 'absolute';
+        frameBg.style.top = '0';
+        frameBg.style.left = '0';
+        frameBg.style.zIndex = '1';
+
+        // Image de l'unité (placeholder)
+        const unitImg = document.createElement('img');
+        unitImg.src = unitTypeData.icon || 'assets/icon/villager.svg';
+        unitImg.style.width = '80%';
+        unitImg.style.height = '80%';
+        unitImg.style.position = 'absolute';
+        unitImg.style.top = '10%';
+        unitImg.style.left = '10%';
+        unitImg.style.zIndex = '0';
+        unitImg.style.borderRadius = '5px';
+
+        unitImgContainer.appendChild(unitImg);
+        unitImgContainer.appendChild(frameBg);
+
+        // PV sous l'image
+        const pvContainer = document.createElement('div');
+        pvContainer.style.display = 'flex';
+        pvContainer.style.alignItems = 'center';
+        pvContainer.style.marginTop = '5px';
+
+        const pvIcon = document.createElement('img');
+        pvIcon.src = 'assets/icon/heart.svg';
+        pvIcon.style.width = '16px';
+        pvIcon.style.height = '16px';
+        pvIcon.style.marginRight = '5px';
+
+        const pvText = document.createElement('span');
+        pvText.textContent = `PV: ${unit.stats.hitPoints}/${unit.stats.hitPoints}`;
+        pvText.style.color = '#333';
+        pvText.style.fontSize = '12px';
+
+        pvContainer.appendChild(pvIcon);
+        pvContainer.appendChild(pvText);
+
+        leftSection.appendChild(unitImgContainer);
+        leftSection.appendChild(pvContainer);
+
+        // Section centrale - Nom et statistiques
+        const centerSection = document.createElement('div');
+        centerSection.style.flex = '1';
+        centerSection.style.minWidth = '200px';
+        centerSection.style.display = 'flex';
+        centerSection.style.flexDirection = 'column';
+        centerSection.style.padding = '5px 15px';
+        centerSection.style.paddingTop = '2%';
+
+        // Nom de l'unité
+        const unitName = document.createElement('div');
+        unitName.textContent = `${unitTypeData.name} (Niveau ${unit.level})`;
+        unitName.style.color = '#333';
+        unitName.style.fontWeight = 'bold';
+        unitName.style.fontSize = '18px';
+        unitName.style.marginBottom = '10px';
+
+        centerSection.appendChild(unitName);
+
+        // Statistiques sous le nom (dégâts, vitesse, portée)
+        const statsContainer = document.createElement('div');
+        statsContainer.style.display = 'flex';
+        statsContainer.style.flexDirection = 'column';
+        statsContainer.style.marginBottom = '10px';
+
+        const statItems = [
+            {name: 'Dégâts', value: unit.stats.damage, icon: 'assets/icon/sword.svg'},
+            {name: 'Vitesse', value: unit.stats.speed.toFixed(1), icon: 'assets/icon/lightning.svg'},
+            {name: 'Portée', value: unit.stats.range, icon: 'assets/icon/cible.svg'},
+            {name: 'Type', value: unit.moveType === 'air' ? 'Aérien' : 'Terrestre', icon: 'assets/icon/steps.svg'}
+        ];
+
+        statItems.forEach(stat => {
+            const statRow = document.createElement('div');
+            statRow.style.display = 'flex';
+            statRow.style.alignItems = 'center';
+            statRow.style.margin = '3px 0';
+
+            const statIcon = document.createElement('img');
+            statIcon.src = stat.icon;
+            statIcon.style.width = '16px';
+            statIcon.style.height = '16px';
+            statIcon.style.marginRight = '8px';
+
+            const statValue = document.createElement('span');
+            statValue.textContent = `${stat.name}: ${stat.value}`;
+            statValue.style.color = '#333';
+            statValue.style.fontSize = '12px';
+
+            statRow.appendChild(statIcon);
+            statRow.appendChild(statValue);
+            statsContainer.appendChild(statRow);
+        });
+
+        centerSection.appendChild(statsContainer);
+
+        // Section droite - Actions
+        const rightSection = document.createElement('div');
+        rightSection.style.display = 'flex';
+        rightSection.style.flexDirection = 'row';
+        rightSection.style.minWidth = '100px';
+        rightSection.style.padding = '5px';
+        rightSection.style.paddingTop = '2%';
+        rightSection.style.gap = '10px';
+        rightSection.style.justifyContent = 'space-between';
+
+        // Zone des boutons d'action
+        const actionsContainer = document.createElement('div');
+        actionsContainer.style.display = 'grid';
+        actionsContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
+        actionsContainer.style.gridTemplateRows = 'repeat(2, 1fr)';
+        actionsContainer.style.gap = '5px';
+        actionsContainer.style.width = '80px';
+        actionsContainer.style.height = 'auto';
+
+        // Bouton déplacer (déjà actif, mais ajouter une indication visuelle)
+        const moveButton = this.createActionButton('Move', 'assets/interfaces/move.svg', () => {
+            this.showMessage("Cliquez sur une destination pour déplacer l'unité", 2000);
+            this.hideUnitInterface();
+        });
+        moveButton.style.gridRow = '1';
+        moveButton.style.width = '80%';
+        moveButton.style.height = '80%';
+        actionsContainer.appendChild(moveButton);
+
+        // Bouton supprimer
+        const deleteButton = this.createActionButton('Delete', 'assets/interfaces/delete.svg', () => {
+            this.scene.unitManager.removeUnit(unit);
+            this.hideUnitInterface();
+        });
+        deleteButton.style.gridRow = '2';
+        deleteButton.style.width = '80%';
+        deleteButton.style.height = '80%';
+        actionsContainer.appendChild(deleteButton);
+
+        rightSection.appendChild(actionsContainer);
+
+        // Ajouter les sections à l'interface
+        interfaceElement.appendChild(leftSection);
+        interfaceElement.appendChild(centerSection);
+        interfaceElement.appendChild(rightSection);
+
+        // Ajouter règles de style pour la responsivité sur petits écrans
+        const mediaQuery = document.createElement('style');
+        mediaQuery.textContent = `
+        @media screen and (max-width: 600px) {
+            #unit-interface {
+                flex-direction: column;
+                align-items: center;
+            }
+            #unit-interface > div {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+        }
+    `;
+        document.head.appendChild(mediaQuery);
+
+        // Ajouter l'interface au corps de la page
+        document.body.appendChild(interfaceElement);
+
+        this.activeUnitInterface = interfaceElement;
+    }
+
+    /**
+     * Cache l'interface de l'unité
+     */
+    hideUnitInterface() {
+        if (this.activeUnitInterface && document.body.contains(this.activeUnitInterface)) {
+            document.body.removeChild(this.activeUnitInterface);
+        }
+        this.activeUnitInterface = null;
+    }
+
     preloadResources() {
         return [
             {key: 'gold', icon: 'assets/icon/gold.svg'},
@@ -51,10 +284,6 @@ class UIManager {
         }
     }
 
-// La partie principale de showBuildingInterface avec la modification de l'affichage des ressources
-
-// La partie principale de showBuildingInterface avec la modification de l'affichage des ressources
-
     showBuildingInterface(building) {
         // Masquer toute interface existante
         if (this.hideBuildingMenu) {
@@ -73,6 +302,7 @@ class UIManager {
         }
 
         this.hideBuildingInterface();
+        this.hideUnitInterface();
 
         const buildingType = gameData.buildingTypes[building.type];
         if (!buildingType) return;
@@ -233,6 +463,7 @@ class UIManager {
         const canStore = buildingType.specialAction === 'storeResources';
 
         // Zone de formation - occupe la partie gauche de la section droite
+// Zone de formation - occupe la partie gauche de la section droite
         if (canTrain) {
             // Récupérer le premier type d'unité formable pour ce bâtiment
             const unitType = buildingType.trainableUnits[0];
@@ -276,8 +507,6 @@ class UIManager {
             trainBackground.style.left = '0';
             trainBackground.style.objectFit = 'contain';
 
-            // Pas de bouton/indicateur supplémentaire - nous utilisons directement la zone de formation
-
             // Style pour chaque ressource
             const resources = this.resources;
 
@@ -318,7 +547,7 @@ class UIManager {
 
             // Ajouter les détails de coût au tooltip
             resources.forEach(resource => {
-                if (unitInfo.cost[resource.key]) {
+                if (unitInfo.cost && unitInfo.cost[resource.key]) {
                     // Vérifier si le joueur a assez de cette ressource
                     const hasEnough = gameData.resources[resource.key] >= unitInfo.cost[resource.key];
                     if (!hasEnough) hasResources = false;
@@ -365,7 +594,14 @@ class UIManager {
             statusMessage.style.fontSize = '12px';
             costTooltip.appendChild(statusMessage);
 
-            // Pas d'indicateur séparé à mettre à jour
+            // Temps de formation
+            const timeInfo = document.createElement('div');
+            timeInfo.textContent = `Temps: ${unitInfo.trainingTime}s`;
+            timeInfo.style.color = 'white';
+            timeInfo.style.textAlign = 'center';
+            timeInfo.style.marginTop = '5px';
+            timeInfo.style.fontSize = '12px';
+            costTooltip.appendChild(timeInfo);
 
             // Ajouter les éléments au conteneur
             trainArea.appendChild(trainBackground);
@@ -378,8 +614,14 @@ class UIManager {
                 costTooltip.style.display = 'none';
 
                 if (hasResources) {
-                    // Former l'unité directement
-                    this.trainUnitDirectly(building, unitType);
+                    // Former l'unité directement via UnitManager
+                    const success = this.scene.unitManager.trainUnit(unitType, building.id);
+                    if (success) {
+                        this.showMessage(`Formation de ${unitInfo.name} lancée!`, 2000);
+                        this.hideBuildingInterface();
+                    } else {
+                        this.showMessage('Impossible de former cette unité!', 2000);
+                    }
                 } else {
                     // Afficher un message d'erreur
                     this.showMessage('Ressources insuffisantes!', 2000);
@@ -388,7 +630,6 @@ class UIManager {
 
             rightSection.appendChild(trainArea);
         }
-
         // Zone des autres boutons - occupe la partie droite de la section droite
         const actionsContainer = document.createElement('div');
         actionsContainer.style.display = 'grid';
@@ -459,7 +700,6 @@ class UIManager {
 
         this.activeBuildingInterface = interfaceElement;
     }
-
     createActionButton(name, iconSrc, clickHandler) {
         const button = document.createElement('div');
         button.style.width = '80px';
